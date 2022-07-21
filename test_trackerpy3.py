@@ -18,6 +18,7 @@ my_rad_int = randrange(100)
 
 
 
+
 def get_random_string(length):
     # choose from all lowercase letter
         letters = string.ascii_letters
@@ -135,13 +136,10 @@ class TestCalc(unittest.TestCase):
         create_anaylsis_entry2()
         create_basic_habit_test_for_no_user_input()
         
-        
-        
-        
-        print("New Test") 
+        print("New Test\n") 
         
     def tearDown(self):
-        pass
+        print("End Test\n") 
         
 # takes the random genereated strings and integes and see if the can create a class
     def test_habit(self):
@@ -356,24 +354,39 @@ class TestCalc(unittest.TestCase):
 
     #test format check right user input
     @patch('builtins.input', side_effect=[random_date_start])
-    def test_format_check(self, mock_input):
+    def test_format_check_right_user_input(self, mock_input):
         actual_value = self.test_interface.format_check("%Y-%m-%d", "test")
         expected_value = dt.datetime.strptime(random_date_start, "%Y-%m-%d")
         self.assertEqual(actual_value, expected_value)
 
     #test format check wrong user input
     @patch('builtins.input', side_effect=["some mysterious string", random_date_start])
-    def test_format_check(self, mock_input):
+    def test_format_check_wrong_user_input(self, mock_input):
         actual_value = self.test_interface.format_check("%Y-%m-%d", "test")
         expected_value = dt.datetime.strptime(random_date_start, "%Y-%m-%d")
         self.assertEqual(actual_value, expected_value)
 
 
-    
+    #test int and range check right user input
+    @patch('builtins.input', side_effect=[my_rad_int])
+    def test_int_and_range_check_right_user_input(self, mock_input):
+        actual_value = self.test_interface.int_and_range_check(1, 100, "test")
+        expected_value = my_rad_int
+        self.assertEqual(actual_value, expected_value)
 
 
-   
+    #test int and range check wrong user input
+    @patch('builtins.input', side_effect=["some mysterious string", my_rad_int])
+    def test_int_and_range_check_wrong_user_input(self, mock_input):
+        actual_value = self.test_interface.int_and_range_check(1, 100, "test")
+        expected_value = my_rad_int
+        self.assertEqual(actual_value, expected_value)
 
+    #delte habit test
+    @patch('builtins.input', side_effect=["Max"])
+    def test_int_and_range_check_wrong_user_input(self, mock_input):
+        self.test_interface.delete_habit()
+        self.assertRaises(KeyError, lambda: self.test_interface.habit_dict["Max"])  
 
 
    

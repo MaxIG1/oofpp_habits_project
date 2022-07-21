@@ -406,7 +406,7 @@ Press 2. if you are done with creating habits\n"
             del self.habit_dict[name]
             print(f"Deleted your habit {name} successfully")   
                        
-        if name not in self.habit_dict:
+        else: 
             print("print no such habit exists. Try again")
           
                 
