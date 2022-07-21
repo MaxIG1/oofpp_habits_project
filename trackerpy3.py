@@ -23,6 +23,7 @@ class Seven_day_habit:
         self.created = ()
         self.lowest_streak = ()
         self.highest_streak = ()
+        self.end_date = ()
        
         
         
@@ -247,33 +248,35 @@ Press 2. if you did not achieve your goal habit {self.habit_name} today, the {da
             # the following line checks if the user input has the necessary date format.
             
             entry_date = interface.format_check(fmt, text)
-            
-            #input_check = input("Y/N")
-            
-            timedelta = self.start_date - entry_date.date()
-            timedelta_days_check = timedelta.days%self.periodicity
-            row_posistion_of_entry_date = self.df.index[self.df["Date"] == str(entry_date)].tolist()
-            if timedelta_days_check == 0:
+
+            if self.start_date <= entry_date.date <= self.end_date:
+
+                timedelta = self.start_date - entry_date.date()
+                timedelta_days_check = timedelta.days%self.periodicity
+                row_posistion_of_entry_date = self.df.index[self.df["Date"] == str(entry_date)].tolist()
+                if timedelta_days_check == 0:
                 
-                lowval = 1
-                highval = 2
-                text = f"Press 1. if you did achieve your goal for habit {self.habit_name} on the {entry_date.date()}.\n\
+                    lowval = 1
+                    highval = 2
+                    text = f"Press 1. if you did achieve your goal for habit {self.habit_name} on the {entry_date.date()}.\n\
 Press 2. if you did not achieve your goal habit {self.habit_name} on the {entry_date.date()}.\n"
 
-                #the functions only accepts user input as integeger and within the definerd range Loval, highval.
-                input_check = interface.int_and_range_check(lowval, highval, text)
-                if input_check == 1:
-                    self.df.loc[[row_posistion_of_entry_date[0]], self.habit_name] = True
-                    self.df.loc[[row_posistion_of_entry_date[0]], self.entry_time_name] = current_time
-                    print("Positive entry added for", entry_date.date())
+                    #the functions only accepts user input as integeger and within the definerd range Loval, highval.
+                    input_check = interface.int_and_range_check(lowval, highval, text)
+                    if input_check == 1:
+                        self.df.loc[[row_posistion_of_entry_date[0]], self.habit_name] = True
+                        self.df.loc[[row_posistion_of_entry_date[0]], self.entry_time_name] = current_time
+                        print("Positive entry added for", entry_date.date())
         
-                elif input_check == 2:
-                    self.df.loc[[row_posistion_of_entry_date[0]], self.habit_name] = False
-                    self.df.loc[[row_posistion_of_entry_date[0]], self.entry_time_name] = current_time
-                    print("Negativ entry added for", entry_date.date())
+                    elif input_check == 2:
+                        self.df.loc[[row_posistion_of_entry_date[0]], self.habit_name] = False
+                        self.df.loc[[row_posistion_of_entry_date[0]], self.entry_time_name] = current_time
+                        print("Negativ entry added for", entry_date.date())
             
-            else:
-                print("the time period of", self.periodicity, "has not passed")
+                else:
+                    print("the time period of", self.periodicity, "has not passed")
+
+            else: print("you are outside of your timeframe")
                  
             lowval = 1
             highval = 2
@@ -345,6 +348,8 @@ Press 2: From custom date to custom date\n"
             if input_check == 1:
                 start = str(dt.date.today())
                 end = str(dt.datetime.now().year) + "-12-31"
+                end_date_to_be_transformed = datetimeobj=dt.datetime.strptime(end, "%Y-%m-%d")
+                self.habit_dict[name].end_date = end_date_to_be_transformed.date() 
                 
             elif input_check == 2:
                 while x == True:
@@ -362,6 +367,7 @@ Press 2: From custom date to custom date\n"
             
                     end_to_be_transformed = self.format_check(fmt, text)
                     end = str(end_to_be_transformed.date())
+                    self.habit_dict[name].end_date = end_to_be_transformed.date()
                     
                     x = start_to_be_transformed > end_to_be_transformed
                 
