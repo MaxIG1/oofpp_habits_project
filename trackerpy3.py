@@ -204,8 +204,7 @@ Press 2. to analyse your sucess streak for your habit {self.habit_name}.\n"
                 print("Start of tracking date outside of dataframe. Try Again.") 
                 
     
-    
-                            
+          
     def add_value_today(self):
         
         #this function adds an entry today. Its is slighly redundant with the function add_value_anyday(self) 
@@ -233,7 +232,13 @@ Press 2. if you did not achieve your goal habit {self.habit_name} today, the {da
                 print("no", self.periodicity, "days have passed")
             
         elif input_check == 2:
-            self.df.loc[len(self.df)] = False
+            
+            timedelta = self.start_date - dt.date.today()
+            timedelta_days_check = timedelta.days%self.periodicity
+            if timedelta_days_check == 0: 
+                self.df.loc[[date_today_index[0]], self.habit_name] = False
+            else:
+                print("no", self.periodicity, "days have passed")
                  
                 
     def add_value_anyday(self):

@@ -75,6 +75,10 @@ new_entry_outside_of_df_periodicity = right_tracking_start - dt.timedelta(3)
 #creating a date 14 days from today 
 date_today_14 = dt.date.today() + dt.timedelta(14)
 
+#creating an entry with wrong periodicity for add_value_today
+wrong_periodicity_add_value_today = dt.date.today() + dt.timedelta(3)
+
+
 
 
 #create a random date within the start of tracking and end of dataframe, so that a right entry date is created.
@@ -82,7 +86,6 @@ time_between_dates = random_date_end - right_tracking_start
 days_between_dates = time_between_dates.days
 random_number_of_days = random.randrange(days_between_dates)
 right_entry_date = right_tracking_start + dt.timedelta(days=random_number_of_days)
-
 
 #transform datetime to string
 
@@ -96,11 +99,6 @@ new_entry_outside_of_periodicity = str(new_entry_outside_of_periodicity)
 new_entry_outside_of_df_periodicity  = str(new_entry_outside_of_df_periodicity)
 date_today_14 = str(date_today_14)
 
-test1_interface = Interface()
-
-
-
-
 
 class TestCalc(unittest.TestCase):
 
@@ -112,8 +110,35 @@ class TestCalc(unittest.TestCase):
         @patch('builtins.input', side_effect=["Max", 7, 2, random_date_start, random_date_end, right_tracking_start, 2])
         def create_basic_habit(mock_input):
             self.test_interface.create_habit()
+        @patch('builtins.input', side_effect=["today", 7, 2, date_today, date_today_14, date_today, 2])
+        def create_today_habit(mock_input):
+            self.test_interface.create_habit()
+        @patch('builtins.input', side_effect=["test", 7, 2, random_date_start, random_date_end, right_tracking_start, 2])
+        def create_basic_habit_analysis(mock_input):
+            self.test_interface.create_habit()
+
+        @patch('builtins.input', side_effect=[right_tracking_start, yes, no])
+        def create_anaylsis_entry1(mock_input):
+            self.test_interface.habit_dict["test"].add_value_anyday()
+        @patch('builtins.input', side_effect=[new_entry_within_periodicity , yes, no])
+        def create_anaylsis_entry2(mock_input):
+            self.test_interface.habit_dict["test"].add_value_anyday()
+
+        @patch('builtins.input', side_effect=["test_for_no_user_input", 1, 2, "2022-01-01", "2022-12-31", "2022-01-01", 2])
+        def create_basic_habit_test_for_no_user_input(mock_input):
+            self.test_interface.create_habit()
+        
         create_basic_habit()
-        print("New Test")
+        create_today_habit()
+        create_basic_habit_analysis()
+        create_anaylsis_entry1()
+        create_anaylsis_entry2()
+        create_basic_habit_test_for_no_user_input()
+        
+        
+        
+        
+        print("New Test") 
         
     def tearDown(self):
         pass
@@ -260,11 +285,93 @@ class TestCalc(unittest.TestCase):
         self.test_interface.habit_dict["Max"].add_value_anyday()
         row_posistion_of_entry_date = self.test_interface.habit_dict["Max"].df.index[self.test_interface.habit_dict["Max"].df["Max"] == True].tolist()
         row_postion_test = self.test_interface.habit_dict["Max"].df.index[self.test_interface.habit_dict["Max"].df["Date"] == new_entry_within_periodicity].tolist()  
+        self.assertEqual(row_posistion_of_entry_date, row_postion_test) 
+
+# add value today right entry
+
+    @patch('builtins.input', side_effect=[1])
+    def test_add_value_today_right_input(self, mock_input):
+        self.test_interface.habit_dict["today"].add_value_today()
+        row_posistion_of_entry_date = self.test_interface.habit_dict["today"].df.index[self.test_interface.habit_dict["today"].df["today"] == True].tolist()
+        row_postion_test = self.test_interface.habit_dict["today"].df.index[self.test_interface.habit_dict["today"].df["Date"] == date_today].tolist()  
         self.assertEqual(row_posistion_of_entry_date, row_postion_test)   
+
+# add value today entry_outside of periodicity entry
+
+    @patch('builtins.input', side_effect=[1])
+    def test_add_value_today_right_input(self, mock_input):
+        self.test_interface.habit_dict["today"].add_value_today()
+        row_posistion_of_entry_date = self.test_interface.habit_dict["today"].df.index[self.test_interface.habit_dict["today"].df["today"] == True].tolist()
+        row_postion_test = self.test_interface.habit_dict["today"].df.index[self.test_interface.habit_dict["today"].df["Date"] == date_today].tolist()  
+        self.assertEqual(row_posistion_of_entry_date, row_postion_test)   
+
+# test if analysis module works correctly 
+
+    # custom time frame / winning
+
+    @patch('builtins.input', side_effect=[2, right_tracking_start, random_date_end, 2])
+    def test_add_analysis_module(self, mock_input):
+        self.test_interface.habit_dict["test"].analyse_habit()
+        self.assertEqual(self.test_interface.habit_dict["test"].highest_streak, 2)
+
+
+    # test if analysis module works correctly 
+    # Basic time frame / winning
+
+    @patch('builtins.input', side_effect=[1, 2])
+    def test_analysis_module_basic_winning(self, mock_input):
+        self.test_interface.habit_dict["test"].analyse_habit()
+        self.assertEqual(self.test_interface.habit_dict["test"].highest_streak, 2)
+
+    
+    
+
+    # custom time frame / loosing
+    @patch('builtins.input', side_effect=[2, new_entry_within_periodicity, random_date_end, 1])
+    def test_analysis_module_custom_loosing(self, mock_input):
+        self.test_interface.habit_dict["test"].analyse_habit()
+        dt1 = dt.datetime.strptime(new_entry_within_periodicity, "%Y-%m-%d").date()
+        dt2 = dt.datetime.strptime(random_date_end, "%Y-%m-%d").date()
+        timedelta = (((dt2-dt1).days)+1)/7
+        self.assertEqual(self.test_interface.habit_dict["test"].lowest_streak, timedelta)
+
+
+    # Basic time frame / loosing
+    @patch('builtins.input', side_effect=[1, 1])
+    def test_analysis_module_custom_loosing(self, mock_input):
+        self.test_interface.habit_dict["test_for_no_user_input"].analyse_habit()
+        dt1 = dt.datetime.strptime("2022-01-01", "%Y-%m-%d").date()
+        dt2 = dt.datetime.strptime("2022-12-31", "%Y-%m-%d").date()
+        timedelta = ((dt2-dt1).days)+1
+        self.assertEqual(self.test_interface.habit_dict["test_for_no_user_input"].lowest_streak, timedelta)
+    
+    #"test_for_no_user_input"
+    def test_analysis_module_no_user_input_loosing(self):
+        self.test_interface.habit_dict["test_for_no_user_input"].analyse_habit_no_user_input()
+        dt1 = dt.datetime.strptime("2022-01-01", "%Y-%m-%d").date()
+        dt2 = dt.datetime.strptime("2022-12-31", "%Y-%m-%d").date()
+        timedelta = ((dt2-dt1).days)+1
+        self.assertEqual(self.test_interface.habit_dict["test_for_no_user_input"].lowest_streak, timedelta)
+    
+    def test_analysis_module_no_user_input_winning(self):
+        self.test_interface.habit_dict["test_for_no_user_input"].analyse_habit_no_user_input()
+        self.assertEqual(self.test_interface.habit_dict["test_for_no_user_input"].highest_streak, 0)
+
+
+   
+    
+
+
+    
+        
+
+
 
 
 
    
 if __name__ == '__main__':
     unittest.main()
+
+
 
