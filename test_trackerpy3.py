@@ -323,9 +323,6 @@ class TestCalc(unittest.TestCase):
         self.test_interface.habit_dict["test"].analyse_habit()
         self.assertEqual(self.test_interface.habit_dict["test"].highest_streak, 2)
 
-    
-    
-
     # custom time frame / loosing
     @patch('builtins.input', side_effect=[2, new_entry_within_periodicity, random_date_end, 1])
     def test_analysis_module_custom_loosing(self, mock_input):
@@ -357,15 +354,25 @@ class TestCalc(unittest.TestCase):
         self.test_interface.habit_dict["test_for_no_user_input"].analyse_habit_no_user_input()
         self.assertEqual(self.test_interface.habit_dict["test_for_no_user_input"].highest_streak, 0)
 
+    #test format check right user input
+    @patch('builtins.input', side_effect=[random_date_start])
+    def test_format_check(self, mock_input):
+        actual_value = self.test_interface.format_check("%Y-%m-%d", "test")
+        expected_value = dt.datetime.strptime(random_date_start, "%Y-%m-%d")
+        self.assertEqual(actual_value, expected_value)
+
+    #test format check wrong user input
+    @patch('builtins.input', side_effect=["some mysterious string", random_date_start])
+    def test_format_check(self, mock_input):
+        actual_value = self.test_interface.format_check("%Y-%m-%d", "test")
+        expected_value = dt.datetime.strptime(random_date_start, "%Y-%m-%d")
+        self.assertEqual(actual_value, expected_value)
+
+
+    
+
 
    
-    
-
-
-    
-        
-
-
 
 
 
