@@ -249,7 +249,7 @@ Press 2. if you did not achieve your goal habit {self.habit_name} today, the {da
             
             entry_date = interface.format_check(fmt, text)
 
-            if self.start_date <= entry_date.date <= self.end_date:
+            if self.start_date <= entry_date.date() <= self.end_date:
 
                 timedelta = self.start_date - entry_date.date()
                 timedelta_days_check = timedelta.days%self.periodicity
