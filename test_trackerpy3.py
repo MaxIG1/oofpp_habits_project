@@ -14,6 +14,7 @@ import string
 from random import randrange
 from tabulate import tabulate
 from unittest.mock import MagicMock
+from pathlib import Path
 
 
 
@@ -111,14 +112,16 @@ new_entry_outside_of_df_periodicity  = str(new_entry_outside_of_df_periodicity)
 date_today_14 = str(date_today_14)
 
 
+
+
 class TestCalc(unittest.TestCase):
 
-    
 
     def setUp(self):
         self.test_interface = Interface()
         self.test_datamanager = Datamanager()
         self.test_habit = Seven_day_habit(test_var, my_rad_int)
+
         @patch('builtins.input', side_effect=["Max", 7, 2, random_date_start, random_date_end, right_tracking_start, 2])
         def create_basic_habit(mock_input):
             self.test_interface.create_habit()
@@ -140,20 +143,9 @@ class TestCalc(unittest.TestCase):
         def create_basic_habit_test_for_no_user_input(mock_input):
             self.test_interface.create_habit()
 
-        self.test_interface_1 = Interface()
+        
 
-        @patch('builtins.input', side_effect=["test", 7, 2, random_date_start, random_date_end, right_tracking_start, 2])
-        def create_streak_analysis_habit(mock_input):
-            self.test_interface_1.create_habit()
 
-        @patch('builtins.input', side_effect=[right_tracking_start, yes, no])
-        def create_anaylsis_entry3(mock_input):
-            self.test_interface_1.habit_dict["test"].add_value_anyday()
-
-        @patch('builtins.input', side_effect=[right_tracking_start, yes, no])
-        def create_anaylsis_entry4(mock_input):
-            self.test_interface_1.habit_dict["test"].add_value_anyday()
-     
         
         
         create_basic_habit()
@@ -163,10 +155,14 @@ class TestCalc(unittest.TestCase):
         create_anaylsis_entry2()
         create_basic_habit_test_for_no_user_input()
         
+        
         print("New Test\n") 
         
     def tearDown(self):
         print("End Test\n") 
+
+    
+
         
 # takes the random genereated strings and integes and see if the can create a class
     def test_habit(self):
@@ -320,6 +316,7 @@ class TestCalc(unittest.TestCase):
         row_posistion_of_entry_date = self.test_interface.habit_dict["today"].df.index[self.test_interface.habit_dict["today"].df["today"] == True].tolist()
         row_postion_test = self.test_interface.habit_dict["today"].df.index[self.test_interface.habit_dict["today"].df["Date"] == date_today].tolist()  
         self.assertEqual(row_posistion_of_entry_date, row_postion_test)   
+        
 
 # add value today entry_outside of periodicity entry
 
@@ -394,6 +391,7 @@ class TestCalc(unittest.TestCase):
         self.assertEqual(actual_value, expected_value)
 
 
+
     #test int and range check right user input
     @patch('builtins.input', side_effect=[my_rad_int])
     def test_int_and_range_check_right_user_input(self, mock_input):
@@ -446,14 +444,64 @@ class TestCalc(unittest.TestCase):
         date_today = "{:%Y_%m_%d_%H_%M_%S}".format(dt.datetime.now())
         file_name_today = "habit_file" +"_" + date_today +".csv\n" 
         expected_value  = "saved as" +" "+ file_name_today   
-        self.assertEqual(actual_value, expected_value)     
+        self.assertEqual(actual_value, expected_value)  
 
-    @patch('builtins.input', side_effect=[1])
-    def test_func1__should_call_func2(self, mock_input):
+
+    
+    @patch('builtins.input', side_effect=[1, 7])
+    def test_interface_import_from_file(self, mock_input):
         self.test_interface.user_interface()
-        self.test_interface.import_from_file = MagicMock()
-        self.test_interface.import_from_file.assert_called()
+       
 
+
+    @patch('builtins.input', side_effect=[2, "megatest", new_test_periodicity, yes, date_today, no, 7])
+    def test_interface_create_habit(self, mock_input):
+        self.test_interface.user_interface()
+        self.assertEqual(self.test_interface.habit_dict["megatest"].habit_name, "megatest")
+
+    @patch('builtins.input', side_effect=[3, "Max",  7])
+    def test_interface_delete_habit(self, mock_input):
+        self.test_interface.user_interface()
+        self.assertRaises(KeyError, lambda: self.test_interface.habit_dict["Max"])
+
+    @patch('builtins.input', side_effect=[4, "super", 7])
+    def test_interface_add_value(self, mock_input):
+        self.test_interface.user_interface()
+        self.assertRaises(KeyError, lambda: self.test_interface.habit_dict["super"])
+
+
+    @patch('builtins.input', side_effect=[5, 1, 7])
+    def test_interface_analyse_habits(self, mock_input):
+        self.test_interface.user_interface()
+
+    
+    #@patch('builtins.input', side_effect=[5, 2, "super", 7])
+    #def test_interface_analyse_streakss(self, mock_input):
+        #interface.user_interface()
+        #self.assertRaises(KeyError, lambda: interface.habit_dict["super"])
+
+    @patch('builtins.input', side_effect=[5, 3, 1, 7])
+    def test_interface_analyse_streakss_equal_periodicity(self, mock_input):
+        self.test_interface.user_interface()
+
+    @patch('builtins.input', side_effect=[5, 4, 1, 7])
+    def test_interface_analyse_streaks_higest(self, mock_input):
+        self.test_interface.user_interface()
+
+    @patch('builtins.input', side_effect=[6])
+    def test_interface_analyse_save_to_file(self, mock_input):
+        self.test_interface.user_interface()
+        capturedOutput = io.StringIO()                
+        sys.stdout = capturedOutput                                          
+        sys.stdout = sys.__stdout__                     
+        actual_value=capturedOutput.getvalue() 
+        date_today = "{:%Y_%m_%d_%H_%M_%S}".format(dt.datetime.now())
+        file_name_today = "habit_file" +"_" + date_today +".csv\n" 
+        expected_value  = "saved as" +" "+ file_name_today  
+
+    @patch('builtins.input', side_effect=[7])
+    def test_interface_close(self, mock_input):
+        self.test_interface.user_interface()
 
 
   
