@@ -1,5 +1,3 @@
-# updated version mit 7 day habbit class
-
 import pandas as pd
 import datetime as dt
 from functools import reduce
@@ -397,8 +395,8 @@ Press 2. if you are done with creating habits\n"
                 
     def delete_habit(self):
         
-        print("The following habits exist:")
-        self.show_all_habit()
+        #print("The following habits exist:")
+        #self.show_all_habit()
   
         name = input("which habit do you want to delete?\n")
     
@@ -407,7 +405,7 @@ Press 2. if you are done with creating habits\n"
             print(f"Deleted your habit {name} successfully")   
                        
         else: 
-            print("print no such habit exists. Try again")
+            print("No such habit exists. Try again")
           
                 
     def show_all_habit(self):
@@ -500,23 +498,26 @@ Enter an integer. For example for daily periodicity 1, for weekly periodicity 7.
             
     def user_interface(self):
         
-        table = ["1. Import", "2. Create habit", "3. Delete habit", "4. Add new entry", "5. Anaylse habit", "6. Save"]
+        table = ["1. Import", "2. Create habit", "3. Delete habit", "4. Add new entry", "5. Anaylse habit", "6. Save", "7. Close"]
         print("USER INTERFACE \n Press the following numbers for your options\n", tabulate(table))
         
         lowval = 1
-        highval = 6
+        highval = 7
         text = "Choose your option"
         input_check = self.int_and_range_check(lowval, highval, text)
        
         
         if input_check == 1:
             datamanager.import_from_file()
+            self.user_interface()
         
         elif input_check == 2:  
-            interface.create_habit()
+            self.create_habit()
+            self.user_interface()
             
         elif input_check == 3: 
-             interface.delete_habit()
+             self.delete_habit()
+             self.user_interface()
                        
         elif input_check == 4: 
             print("you have data for the following habits:\n")
@@ -534,8 +535,10 @@ Press 2. to add a new entry on anyday.\n"
             
                 if new_entry_check == 1:
                     interface.habit_dict[habit_input].add_value_today()
+                    self.user_interface()
                 elif new_entry_check == 2:
                     interface.habit_dict[habit_input].add_value_anyday()
+                    self.user_interface()
                    
             if habit_input not in self.habit_dict:
                 print("No such habit exists. Try again")
@@ -554,14 +557,17 @@ Press 2. to add a new entry on anyday.\n"
          
             if input_check == 1:
                 interface.show_all_habit()
+                self.user_interface()
+
             elif input_check == 2:
                 print("you have data for the following habits:\n")
                 self.show_all_habit()
-                
                 habit_input = input("Which habit do you want to analyse?\n")
-                interface.habit_dict[habit_input].analyse_habit()   
+                interface.habit_dict[habit_input].analyse_habit()
+                self.user_interface()   
             elif input_check == 3:
                 interface.present_habits_with_equal_periodicity()
+                self.user_interface()
             elif input_check == 4:
                 lowval = 1
                 highval = 2
@@ -571,11 +577,17 @@ Press 2. to analyse the habit with the longest unsucessful streak.\n"
                 input_check = self.int_and_range_check(lowval, highval, text)
                 if input_check == 1:
                     interface.analyse_habit_max_streak()
+                    self.user_interface()
                 elif input_check == 2:
                     interface.analyse_habit_min_streak()
+                    self.user_interface()
                 
             elif input_check == 6:
                 datamanager.saveall_merged_to_file()
+                self.user_interface()
+
+            elif input_check == 7:
+                print("Goodbye")
 
             
                      
@@ -588,7 +600,8 @@ class Datamanager:
             
             
     def saveall_merged_to_file(self):
-        date_today = str(dt.date.today())
+    
+        date_today = "{:%Y_%m_%d_%H_%M_%S}".format(dt.datetime.now())
         df_list = []
         meta_data_list = ["Blank"]
         merged_df = []
@@ -605,8 +618,7 @@ class Datamanager:
         
         merged_df.loc[len(merged_df.index)] = meta_data_list
       
-        
-        str_datetime_today = str(dt.datetime.today())
+        date_today = "{:%Y_%m_%d_%H_%M_%S}".format(dt.datetime.now())
         file_name_today = "habit_file" +"_" + date_today +".csv" 
         merged_df.to_csv(file_name_today, index=False)
         print("saved as", file_name_today)
@@ -614,7 +626,7 @@ class Datamanager:
         
     def import_from_file(self):
        
-        file_name = r"C:\Users\Max_G\habit_file_2022-07-13.csv"
+        file_name = r"C:\Users\Max_G\habit_file_2022-07-22.csv"
         #file_name = input("Enter your the directory and filename of your file")
     
         df = pd.read_csv(f"{file_name}")
@@ -632,21 +644,20 @@ class Datamanager:
             col_name1 = "entry time " + name
             col_name2 = "start " + name
             interface.habit_dict[name].df = df[['Date', interface.habit_dict[name].habit_name, col_name1, col_name2]]
-            interface.habit_dict[name].df = \
-            interface.habit_dict[name].df[interface.habit_dict[name].df[interface.habit_dict[name].habit_name].notna()]
+            interface.habit_dict[name].df = interface.habit_dict[name].df[interface.habit_dict[name].df[interface.habit_dict[name].habit_name].notna()]
             interface.habit_dict[name].df = interface.habit_dict[name].df.reset_index(drop=True)
-            interface.habit_dict[name].df[name] = \
-            interface.habit_dict[name].df[name].map({'True': True, 'False': False})
-            interface.habit_dict[name].df[col_name2] = \
-            interface.habit_dict[name].df[col_name2].map({'True': True, 'False': False})
-            interface.habit_dict[name].row_position_start_date = \
-            interface.habit_dict[name].df.index[interface.habit_dict[name].df[col_name2] == True].tolist()
+            interface.habit_dict[name].df[name] = interface.habit_dict[name].df[name].map({'True': True, 'False': False})
+            interface.habit_dict[name].df[col_name2] = interface.habit_dict[name].df[col_name2].map({'True': True, 'False': False})
+            interface.habit_dict[name].row_position_start_date = interface.habit_dict[name].df.index[interface.habit_dict[name].df[col_name2] == True].tolist()
             interface.habit_dict[name].df["Date"] = pd.to_datetime(interface.habit_dict[name].df["Date"])
-            interface.habit_dict[name].start_date = \
-            interface.habit_dict[name].df["Date"][interface.habit_dict[name].row_position_start_date][0]
-            interface.habit_dict[name].start_date = interface.habit_dict[name].start_date.date()       
+            interface.habit_dict[name].start_date = interface.habit_dict[name].df["Date"][interface.habit_dict[name].row_position_start_date][0]
+            interface.habit_dict[name].start_date = interface.habit_dict[name].start_date.date()    
+            interface.habit_dict[name].end_date = interface.habit_dict[name].df.loc[len(interface.habit_dict[name].df)-1,"Date"].date()    
+        
                
             
 interface = Interface()
-datamanager = Datamanager()           
-                             
+datamanager = Datamanager()          
+
+      
+

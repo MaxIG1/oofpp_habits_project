@@ -1,8 +1,10 @@
-
+import io
+import sys
 from turtle import right
 import unittest
 from trackerpy3 import Seven_day_habit
 from trackerpy3 import Interface
+from trackerpy3 import Datamanager
 import pandas as pd
 from unittest import mock
 from unittest.mock import patch
@@ -10,6 +12,14 @@ import datetime as dt
 import random
 import string
 from random import randrange
+from tabulate import tabulate
+from unittest.mock import MagicMock
+
+
+
+
+
+
 
 
 #this test creates random strings with random lenghts so that the test works always with different strings
@@ -107,6 +117,7 @@ class TestCalc(unittest.TestCase):
 
     def setUp(self):
         self.test_interface = Interface()
+        self.test_datamanager = Datamanager()
         self.test_habit = Seven_day_habit(test_var, my_rad_int)
         @patch('builtins.input', side_effect=["Max", 7, 2, random_date_start, random_date_end, right_tracking_start, 2])
         def create_basic_habit(mock_input):
@@ -128,6 +139,22 @@ class TestCalc(unittest.TestCase):
         @patch('builtins.input', side_effect=["test_for_no_user_input", 1, 2, "2022-01-01", "2022-12-31", "2022-01-01", 2])
         def create_basic_habit_test_for_no_user_input(mock_input):
             self.test_interface.create_habit()
+
+        self.test_interface_1 = Interface()
+
+        @patch('builtins.input', side_effect=["test", 7, 2, random_date_start, random_date_end, right_tracking_start, 2])
+        def create_streak_analysis_habit(mock_input):
+            self.test_interface_1.create_habit()
+
+        @patch('builtins.input', side_effect=[right_tracking_start, yes, no])
+        def create_anaylsis_entry3(mock_input):
+            self.test_interface_1.habit_dict["test"].add_value_anyday()
+
+        @patch('builtins.input', side_effect=[right_tracking_start, yes, no])
+        def create_anaylsis_entry4(mock_input):
+            self.test_interface_1.habit_dict["test"].add_value_anyday()
+     
+        
         
         create_basic_habit()
         create_today_habit()
@@ -384,14 +411,53 @@ class TestCalc(unittest.TestCase):
 
     #delte habit test
     @patch('builtins.input', side_effect=["Max"])
-    def test_int_and_range_check_wrong_user_input(self, mock_input):
+    def delete_habit_habit_exists(self, mock_input):
         self.test_interface.delete_habit()
-        self.assertRaises(KeyError, lambda: self.test_interface.habit_dict["Max"])  
+        self.assertRaises(KeyError, lambda: self.test_interface.habit_dict["Max"])
+
+    #delte habit test with user input failure
+    @patch('builtins.input', side_effect=["nononono"])
+    def test_delete_habit_failure(self, mock_input):
+        capturedOutput = io.StringIO()                  
+        sys.stdout = capturedOutput                    
+        self.test_interface.delete_habit()                                     
+        sys.stdout = sys.__stdout__                    
+        actual_value=capturedOutput.getvalue() 
+        expected_value = "No such habit exists. Try again\n"
+        self.assertEqual(actual_value, expected_value)     
+     
+    #obviously the test needs to be adapeted to a file existing on the users computer.
+    @patch('builtins.input', side_effect=[r"C:\Users\Max_G\ProgrammierProjekte\Habit-Tracker_IU\habit_file_2022-07-22.csv"])
+    def test_import_from_file(self, mock_input):
+        capturedOutput = io.StringIO()                
+        sys.stdout = capturedOutput                     
+        self.test_datamanager.import_from_file()                               
+        sys.stdout = sys.__stdout__                     
+        actual_value=capturedOutput.getvalue() 
+        expected_value = "the following habits have beein imported ['test', 'supertest']\n"
+        self.assertEqual(actual_value, expected_value)     
+
+    def test_save_to_file(self):
+        capturedOutput = io.StringIO()                
+        sys.stdout = capturedOutput                     
+        self.test_datamanager.saveall_merged_to_file()                       
+        sys.stdout = sys.__stdout__                     
+        actual_value=capturedOutput.getvalue() 
+        date_today = "{:%Y_%m_%d_%H_%M_%S}".format(dt.datetime.now())
+        file_name_today = "habit_file" +"_" + date_today +".csv\n" 
+        expected_value  = "saved as" +" "+ file_name_today   
+        self.assertEqual(actual_value, expected_value)     
+
+    @patch('builtins.input', side_effect=[1])
+    def test_func1__should_call_func2(self, mock_input):
+        self.test_interface.user_interface()
+        self.test_interface.import_from_file = MagicMock()
+        self.test_interface.import_from_file.assert_called()
 
 
+
+  
    
 if __name__ == '__main__':
     unittest.main()
-
-
 
