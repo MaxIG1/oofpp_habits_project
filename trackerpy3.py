@@ -2,8 +2,7 @@ import pandas as pd
 import datetime as dt
 from functools import reduce
 from tabulate import tabulate
-from unittest import mock
-from unittest.mock import patch
+
 
 
 
@@ -17,7 +16,6 @@ class Seven_day_habit:
         self.entry_time_name = "entry time " + self.habit_name
         self.start_date = ()
         self.row_position_start_date = ()
-        #self.df = pd.DataFrame({"Date": pd.date_range("2022-01-01", "2022-12-31"), self.habit_name: False, self.entry_time_name : " "})
         self.created = ()
         self.lowest_streak = ()
         self.highest_streak = ()
@@ -105,9 +103,13 @@ Press 2. to analyse your sucess streak for your habit {self.habit_name}.\n"
                 index_low_of_lowest_streak = index_up_of_lowest_streak[0] - self.lowest_streak + 1
                 start_date_of_lowest_streak = df_loosing_subset.at[index_low_of_lowest_streak, "Date"]
                 end_date_of_lowest_streak = df_loosing_subset.at[index_up_of_lowest_streak[0], "Date"]
-                    
-                print(f"Your habit {self.habit_name} has the longest streak of not achieving your goal \n\
-{self.lowest_streak} between {start_date_of_lowest_streak.date()} and {end_date_of_lowest_streak.date()}")
+
+                number_of_days = self.lowest_streak*self.periodicity
+                number_of_weeks = round((self.lowest_streak*self.periodicity/7), 4)
+                
+                print(f"Your habit {self.habit_name} with the periodicity of {self.periodicity} has  the longest streak of not achieving your goal \n\
+the following number of days: {number_of_days} or the following number of weeks: {number_of_weeks}  between \n\
+{start_date_of_lowest_streak.date()} and {end_date_of_lowest_streak.date()}. You did not check off your habit {self.lowest_streak} times during that time period.")
     
         # the following lines of code calculate the longest streak
         # of achieving ones goal.    
@@ -135,10 +137,14 @@ Press 2. to analyse your sucess streak for your habit {self.habit_name}.\n"
                 index_up_of_highest_streak = df_winning_subset.index[df_winning_subset["streak_counter"] == self.highest_streak].tolist()
                 index_low_of_highest_streak = index_up_of_highest_streak[0] - self.highest_streak + 1
                 start_date_of_highest_streak = df_winning_subset.at[index_low_of_highest_streak, "Date"]
-                end_date_of_highest_streak = df_winning_subset.at[index_up_of_highest_streak[0], "Date"]
+                end_date_of_highest_streak = df_winning_subset.at[index_up_of_highest_streak[0], "Date"] 
+
+                number_of_days = self.highest_streak*self.periodicity
+                number_of_weeks = round((self.highest_streak*self.periodicity/7), 4)
                 
-                print(f"Your habit {self.habit_name} has the longest streak of achieving your goal \n\
-{self.highest_streak} between {start_date_of_highest_streak.date()} and {end_date_of_highest_streak.date()}")
+                print(f"Your habit {self.habit_name} with the periodicity of {self.periodicity} has  the longest streak of achieving your goal \n\
+the following number of days: {number_of_days} or the following number of weeks: {number_of_weeks}  between \n\
+{start_date_of_highest_streak.date()} and {end_date_of_highest_streak.date()}. You checked your habit {self.highest_streak} times during that time period.")
         
                     
     def analyse_habit_no_user_input(self):
@@ -216,6 +222,8 @@ Press 2. to analyse your sucess streak for your habit {self.habit_name}.\n"
         text = f"Press 1. if you did achieve your goal for habit {self.habit_name} today, the {date_today}.\n\
 Press 2. if you did not achieve your goal habit {self.habit_name} today, the {date_today}\n"
 
+        
+
         #the functions only accepts user input as integeger and within the definerd range Loval, highval.
         input_check = interface.int_and_range_check(lowval, highval, text)
         
@@ -226,6 +234,7 @@ Press 2. if you did not achieve your goal habit {self.habit_name} today, the {da
             timedelta_days_check = timedelta.days%self.periodicity
             if timedelta_days_check == 0: 
                 self.df.loc[[date_today_index[0]], self.habit_name] = True
+                print("Positive entry added for", dt.date.today())
             else:
                 print("no", self.periodicity, "days have passed")
             
@@ -235,6 +244,7 @@ Press 2. if you did not achieve your goal habit {self.habit_name} today, the {da
             timedelta_days_check = timedelta.days%self.periodicity
             if timedelta_days_check == 0: 
                 self.df.loc[[date_today_index[0]], self.habit_name] = False
+                print("Negativ entry added for", dt.date.today())
             else:
                 print("no", self.periodicity, "days have passed")
                  
@@ -326,7 +336,8 @@ class Interface:
         while x == True: 
             
             
-            name = input("Enter the name of your habit ")
+            name = input("Enter the name of your habit.\n")
+            print("Your habit has the name " + name)
             
             # no such thing as an integer infinity exist in the basic python package. Adding an indefinite integer would be possible
             # but I dont think it would be worth it. So the maximum range is three years
@@ -395,8 +406,8 @@ Press 2. if you are done with creating habits\n"
                 
     def delete_habit(self):
         
-        #print("The following habits exist:")
-        #self.show_all_habit()
+        print("The following habits exist:")
+        self.show_all_habit()
   
         name = input("which habit do you want to delete?\n")
     
@@ -455,7 +466,6 @@ Enter an integer. For example for daily periodicity 1, for weekly periodicity 7.
         for x in self.habit_dict:
             habit_list.append(interface.habit_dict[x])
           
-            
         max_attr = max(habit_list, key=lambda x:x.highest_streak)
         
         if  max_attr.highest_streak == 0:
@@ -582,12 +592,12 @@ Press 2. to analyse the habit with the longest unsucessful streak.\n"
                     interface.analyse_habit_min_streak()
                     self.user_interface()
                 
-            elif input_check == 6:
-                datamanager.saveall_merged_to_file()
-                self.user_interface()
+        elif input_check == 6:
+            datamanager.saveall_merged_to_file()
+            self.user_interface()
 
-            elif input_check == 7:
-                print("Goodbye")
+        elif input_check == 7:
+            print("Goodbye")
 
             
                      
@@ -596,6 +606,7 @@ class Datamanager:
     
     def __init__(self):
         pass
+    
 
             
             
@@ -612,11 +623,18 @@ class Datamanager:
             df_list.append(df_var)
             
         merged_df = reduce(lambda l, r: pd.merge(l, r, on='Date', how='outer'), df_list)
+        merged_df = merged_df.sort_values(by=['Date'])
+        merged_df = merged_df.reset_index(drop=True)
         
+
+
         for x in interface.habit_dict:
             meta_data_list.extend([interface.habit_dict[x].periodicity, interface.habit_dict[x].created, "Blank"])
         
         merged_df.loc[len(merged_df.index)] = meta_data_list
+    
+
+        
       
         date_today = "{:%Y_%m_%d_%H_%M_%S}".format(dt.datetime.now())
         file_name_today = "habit_file" +"_" + date_today +".csv" 
@@ -626,8 +644,8 @@ class Datamanager:
         
     def import_from_file(self):
        
-        file_name = r"C:\Users\Max_G\habit_file_2022-07-22.csv"
-        #file_name = input("Enter your the directory and filename of your file")
+        #file_name = r"C:\Users\Max_G\ProgrammierProjekte\Habit-Tracker_IU\habit_file_2022_07_25_13_49_14"
+        file_name = input("Enter your the directory and filename of your file")
     
         df = pd.read_csv(f"{file_name}")
         
@@ -643,6 +661,7 @@ class Datamanager:
             interface.habit_dict[name].created = pd.to_datetime(created)
             col_name1 = "entry time " + name
             col_name2 = "start " + name
+            # creates the collums of the datafrmae
             interface.habit_dict[name].df = df[['Date', interface.habit_dict[name].habit_name, col_name1, col_name2]]
             interface.habit_dict[name].df = interface.habit_dict[name].df[interface.habit_dict[name].df[interface.habit_dict[name].habit_name].notna()]
             interface.habit_dict[name].df = interface.habit_dict[name].df.reset_index(drop=True)
@@ -650,14 +669,17 @@ class Datamanager:
             interface.habit_dict[name].df[col_name2] = interface.habit_dict[name].df[col_name2].map({'True': True, 'False': False})
             interface.habit_dict[name].row_position_start_date = interface.habit_dict[name].df.index[interface.habit_dict[name].df[col_name2] == True].tolist()
             interface.habit_dict[name].df["Date"] = pd.to_datetime(interface.habit_dict[name].df["Date"])
-            interface.habit_dict[name].start_date = interface.habit_dict[name].df["Date"][interface.habit_dict[name].row_position_start_date][0]
-            interface.habit_dict[name].start_date = interface.habit_dict[name].start_date.date()    
+            row_position_start_date = interface.habit_dict[name].row_position_start_date[0]
+            interface.habit_dict[name].start_date = interface.habit_dict[name].df["Date"].iloc[row_position_start_date].date()  
             interface.habit_dict[name].end_date = interface.habit_dict[name].df.loc[len(interface.habit_dict[name].df)-1,"Date"].date()    
+
+            
         
                
             
 interface = Interface()
-datamanager = Datamanager()          
+datamanager = Datamanager()
+interface.user_interface()          
 
       
 
