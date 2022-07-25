@@ -2,6 +2,7 @@ import io
 import sys
 from turtle import right
 import unittest
+import trackerpy3
 from trackerpy3 import Seven_day_habit
 from trackerpy3 import Interface
 from trackerpy3 import Datamanager
@@ -364,7 +365,7 @@ class TestCalc(unittest.TestCase):
         timedelta = ((dt2-dt1).days)+1
         self.assertEqual(self.test_interface.habit_dict["test_for_no_user_input"].lowest_streak, timedelta)
     
-    #"test_for_no_user_input"
+    #test_for_no_user_input
     def test_analysis_module_no_user_input_loosing(self):
         self.test_interface.habit_dict["test_for_no_user_input"].analyse_habit_no_user_input()
         dt1 = dt.datetime.strptime("2022-01-01", "%Y-%m-%d").date()
@@ -372,6 +373,8 @@ class TestCalc(unittest.TestCase):
         timedelta = ((dt2-dt1).days)+1
         self.assertEqual(self.test_interface.habit_dict["test_for_no_user_input"].lowest_streak, timedelta)
     
+
+
     def test_analysis_module_no_user_input_winning(self):
         self.test_interface.habit_dict["test_for_no_user_input"].analyse_habit_no_user_input()
         self.assertEqual(self.test_interface.habit_dict["test_for_no_user_input"].highest_streak, 0)
@@ -390,15 +393,12 @@ class TestCalc(unittest.TestCase):
         expected_value = dt.datetime.strptime(random_date_start, "%Y-%m-%d")
         self.assertEqual(actual_value, expected_value)
 
-
-
     #test int and range check right user input
     @patch('builtins.input', side_effect=[my_rad_int])
     def test_int_and_range_check_right_user_input(self, mock_input):
         actual_value = self.test_interface.int_and_range_check(1, 100, "test")
         expected_value = my_rad_int
         self.assertEqual(actual_value, expected_value)
-
 
     #test int and range check wrong user input
     @patch('builtins.input', side_effect=["some mysterious string", my_rad_int])
@@ -424,7 +424,7 @@ class TestCalc(unittest.TestCase):
         expected_value = "No such habit exists. Try again\n"
         self.assertEqual(actual_value, expected_value)     
      
-    #obviously the test needs to be adapeted to a file existing on the users computer.
+    #obviously the import test needs to be adapeted to a file existing on the users computer.
     @patch('builtins.input', side_effect=[r"C:\Users\Max_G\ProgrammierProjekte\Habit-Tracker_IU\habit_file_2022-07-22.csv"])
     def test_import_from_file(self, mock_input):
         capturedOutput = io.StringIO()                
@@ -447,17 +447,51 @@ class TestCalc(unittest.TestCase):
         self.assertEqual(actual_value, expected_value)  
 
 
+
+
+    #interface max/min streak analysis
     
-    @patch('builtins.input', side_effect=[1, 7])
-    def test_interface_import_from_file(self, mock_input):
-        self.test_interface.user_interface()
-       
+    #first the import function needs to be created:
+    #obiously the test file needs to be imported
+
+    def test_analyse_max_streak(self):
+        trackerpy3.datamanager.import_from_file()
+        capturedOutput = io.StringIO()                
+        sys.stdout = capturedOutput       
+        trackerpy3.interface.analyse_habit_max_streak()                                          
+        sys.stdout = sys.__stdout__                     
+        actual_value=capturedOutput.getvalue() 
+        expected_value = "Your 1 day habit test has the highest streak of 1\nYour 7 day habit supertest has the highest streak of 1\n"
+        self.assertEqual(actual_value, expected_value)     
+
+
+    def test_analyse_min_streak(self):
+        trackerpy3.datamanager.import_from_file()
+        capturedOutput = io.StringIO()                
+        sys.stdout = capturedOutput       
+        trackerpy3.interface.analyse_habit_min_streak()                                          
+        sys.stdout = sys.__stdout__                     
+        actual_value=capturedOutput.getvalue() 
+        expected_value = "Your 1 day habit test has the longest streak of not achieving your goal of 162 days\n"
+        self.assertEqual(actual_value, expected_value)     
+
+
+    #user_interface tests as far as possible
+
+    @patch.object(trackerpy3.datamanager, "import_from_file")
+    @patch.object(trackerpy3.interface, "int_and_range_check")
+    #@patch('builtins.input', side_effect=[1])
+    def test_interface_test(self, mock_input, mock_input_1):
+        mock_input.return_value = 1
+        trackerpy3.interface.user_interface()
+        mock_input_1.assert_called()
 
 
     @patch('builtins.input', side_effect=[2, "megatest", new_test_periodicity, yes, date_today, no, 7])
     def test_interface_create_habit(self, mock_input):
         self.test_interface.user_interface()
         self.assertEqual(self.test_interface.habit_dict["megatest"].habit_name, "megatest")
+
 
     @patch('builtins.input', side_effect=[3, "Max",  7])
     def test_interface_delete_habit(self, mock_input):
@@ -469,16 +503,10 @@ class TestCalc(unittest.TestCase):
         self.test_interface.user_interface()
         self.assertRaises(KeyError, lambda: self.test_interface.habit_dict["super"])
 
-
     @patch('builtins.input', side_effect=[5, 1, 7])
     def test_interface_analyse_habits(self, mock_input):
         self.test_interface.user_interface()
 
-    
-    #@patch('builtins.input', side_effect=[5, 2, "super", 7])
-    #def test_interface_analyse_streakss(self, mock_input):
-        #interface.user_interface()
-        #self.assertRaises(KeyError, lambda: interface.habit_dict["super"])
 
     @patch('builtins.input', side_effect=[5, 3, 1, 7])
     def test_interface_analyse_streakss_equal_periodicity(self, mock_input):
@@ -488,20 +516,19 @@ class TestCalc(unittest.TestCase):
     def test_interface_analyse_streaks_higest(self, mock_input):
         self.test_interface.user_interface()
 
-    @patch('builtins.input', side_effect=[6])
-    def test_interface_analyse_save_to_file(self, mock_input):
-        self.test_interface.user_interface()
-        capturedOutput = io.StringIO()                
-        sys.stdout = capturedOutput                                          
-        sys.stdout = sys.__stdout__                     
-        actual_value=capturedOutput.getvalue() 
-        date_today = "{:%Y_%m_%d_%H_%M_%S}".format(dt.datetime.now())
-        file_name_today = "habit_file" +"_" + date_today +".csv\n" 
-        expected_value  = "saved as" +" "+ file_name_today  
+    @patch.object(trackerpy3.datamanager, "saveall_merged_to_file")
+    @patch.object(trackerpy3.interface, "int_and_range_check")
+    def test_interface_analyse_save_to_file(self, mock_input, mock_input_1):
+        mock_input.return_value = 6
+        trackerpy3.interface.user_interface()
+        mock_input_1.assert_called_once()
+
 
     @patch('builtins.input', side_effect=[7])
     def test_interface_close(self, mock_input):
         self.test_interface.user_interface()
+        self.test_interface.user_interface = MagicMock()
+        assert self.test_interface.user_interface.called_once()
 
 
   
