@@ -421,32 +421,23 @@ class TestCalc(unittest.TestCase):
     #     self.assertEqual(actual_value, expected_value)     
      
     #obviously the import test needs to be adapeted to a file existing on the users computer.
-    @patch('builtins.input', side_effect=[r"C:\Users\Max_G\ProgrammierProjekte\Habit-Tracker_IU\habit_file_2022-07-22.csv"])
+    @patch('builtins.input', side_effect=[r"C:\Users\Max_G\ProgrammierProjekte\Habit-Tracker_IU\example file.csv"])
     def test_import_from_file(self, mock_input):
         capturedOutput = io.StringIO()                
         sys.stdout = capturedOutput                     
         self.test_datamanager.import_from_file()                               
         sys.stdout = sys.__stdout__                     
         actual_value=capturedOutput.getvalue() 
-        expected_value = "the following habits have beein imported ['test', 'supertest']\n"
-        self.assertEqual(actual_value, expected_value)     
+        expected_value = "the following habits have beein imported ['Boxen', 'Drink Plenty Water', 'Eating Healthy', 'Sleeping Early', 'Meditation']\n"
+        self.assertEqual(actual_value, expected_value) 
 
-    def test_save_to_file(self):
-        capturedOutput = io.StringIO()                
-        sys.stdout = capturedOutput                     
-        self.test_datamanager.saveall_merged_to_file()                       
-        sys.stdout = sys.__stdout__                     
-        actual_value=capturedOutput.getvalue() 
-        date_today = "{:%Y_%m_%d_%H_%M_%S}".format(dt.datetime.now())
-        file_name_today = "habit_file" +"_" + date_today +".csv\n" 
-        expected_value  = "saved as" +" "+ file_name_today   
-        self.assertEqual(actual_value, expected_value)  
-
-
-
+    @patch("trackerpy3.Interface.int_and_range_check")
+    def test_interface_analyse_save1_to_file(self, mock_input_1):
+        mock_input_1.return_value = 1
+        self.test_datamanager.saveall_merged_to_file = MagicMock()
+        assert self.test_datamanager.saveall_merged_to_file.called_once()
 
     #interface max/min streak analysis
-    
     #first the import function needs to be created:
     #obiously the test file needs to be imported
 
@@ -457,7 +448,9 @@ class TestCalc(unittest.TestCase):
         trackerpy3.interface.analyse_habit_max_streak()                                          
         sys.stdout = sys.__stdout__                     
         actual_value=capturedOutput.getvalue() 
-        expected_value = "Your 1 day habit test has the highest streak of 1\nYour 7 day habit supertest has the highest streak of 1\n"
+        expected_value = "Your 7 day habit Eating Healthy has the longest consecutive streak of 21 days\n\
+Your 2 day habit Meditation has the highest streak of 7 ticked of habits in a row\n"
+
         self.assertEqual(actual_value, expected_value)     
 
 
@@ -468,7 +461,8 @@ class TestCalc(unittest.TestCase):
         trackerpy3.interface.analyse_habit_min_streak()                                          
         sys.stdout = sys.__stdout__                     
         actual_value=capturedOutput.getvalue() 
-        expected_value = "Your 1 day habit test has the longest streak of not achieving your goal of 162 days\n"
+        expected_value = "Your 1 day habit Sleeping Early has the longest streak of not ticking of your habit 23 times in a row\n\
+Your 1 day habit Sleeping Early has the longest consecutive streak of not achieving your goal 23 days\n"
         self.assertEqual(actual_value, expected_value)     
 
 
@@ -525,6 +519,11 @@ class TestCalc(unittest.TestCase):
         self.test_interface.user_interface()
         self.test_interface.user_interface = MagicMock()
         assert self.test_interface.user_interface.called_once()
+
+    
+
+
+
 
 
   
