@@ -3,11 +3,6 @@ import datetime as dt
 from functools import reduce
 from tabulate import tabulate
 
-
-
-
-
-
 class Seven_day_habit:
     def __init__(self, name, periodicity):
         self.df = ()
@@ -20,13 +15,11 @@ class Seven_day_habit:
         self.lowest_streak = ()
         self.highest_streak = ()
         self.end_date = ()
+        self.number_of_days_highest = ()
+        self.number_of_days_lowest = ()
        
-        
-        
- 
+# this function is the analysis function. It analyses streaks depending on the periodicity of the habit.
     def analyse_habit(self):
-        
-    
         lowval = 1
         highval = 2
         text = "Press 1. if you want to analyse your habit from start day until today.\n\
@@ -37,34 +30,31 @@ Press 2. if you want to analyse a custom timeframe\n"
         
         #option 1 creates a temporary dataframe, from the tracking start date to today. The analysis method works only 
         #with adjacent rows, therefore only cells within periodicity are stored within the temporary dataframe.
-        
         if input_check == 1:
             row_position_start_date = self.row_position_start_date
             df = self.df.iloc[row_position_start_date[0]::self.periodicity, :]
             df = df.reset_index(drop=True)
      
-    
-    
         #option 2 creates a temporary dataframe, from the custom inputs. The analysis method works only 
         #with adjacent rows, therefore only cells within periodicity are stored within the temporary dataframe.
-        
-        
         elif input_check == 2:
             
             fmt = "%Y-%m-%d"
             text = "Enter yyyy-mm-dd of beginning date of your analysis"
+
             # the following line checks if the user input has the necessary date format.
-            
             date = interface.format_check(fmt, text)
+
             # the following code line gives back the row index of date, to build the temporary dataframe.
             row_position_start_index = self.df.index[self.df["Date"] == date].tolist()
           
             text = "Enter yyyy-mm-dd of end date of your analysis"
+
             # the following function checks if the user input has the necessary date format.
-            
             date = interface.format_check(fmt, text)
             row_position_end_index = self.df.index[self.df["Date"] == date].tolist()
             
+            #this is the temp. dataframe for analysis.
             df = self.df.iloc[row_position_start_index[0]:row_position_end_index[0]:self.periodicity, :]
             df = df.reset_index(drop=True)
            
@@ -106,10 +96,13 @@ Press 2. to analyse your sucess streak for your habit {self.habit_name}.\n"
 
                 number_of_days = self.lowest_streak*self.periodicity
                 number_of_weeks = round((self.lowest_streak*self.periodicity/7), 4)
+
+                #the calculation within the number of days is necessary hence if the user again checks off their habit after missing e.g. one streak
+                # they miss the first time periodicty and the days until cheking off.
                 
                 print(f"Your habit {self.habit_name} with the periodicity of {self.periodicity} has  the longest streak of not achieving your goal \n\
-the following number of days: {number_of_days} or the following number of weeks: {number_of_weeks}  between \n\
-{start_date_of_lowest_streak.date()} and {end_date_of_lowest_streak.date()}. You did not check off your habit {self.lowest_streak} times during that time period.")
+the following number of days: {number_of_days+self.periodicity-1} or the following number of weeks: {number_of_weeks}  between \n\
+the {start_date_of_lowest_streak.date()} and the {end_date_of_lowest_streak.date()}. You did not check off your habit {self.lowest_streak} times during that time period.")
     
         # the following lines of code calculate the longest streak
         # of achieving ones goal.    
@@ -142,8 +135,12 @@ the following number of days: {number_of_days} or the following number of weeks:
                 number_of_days = self.highest_streak*self.periodicity
                 number_of_weeks = round((self.highest_streak*self.periodicity/7), 4)
                 
+                #the calculation within the number of days is necessary hence if users only checked of their habit once it should not be counted as seven days.
+                #THe same holds if the habit ends after a streak. Then the user should only get back his days until that day hence it is unclear if the user
+                #will go on with his streak.
+
                 print(f"Your habit {self.habit_name} with the periodicity of {self.periodicity} has  the longest streak of achieving your goal \n\
-the following number of days: {number_of_days} or the following number of weeks: {number_of_weeks}  between \n\
+the following number of days: {number_of_days-self.periodicity-1} or the following number of weeks: {number_of_weeks}  between \n\
 {start_date_of_highest_streak.date()} and {end_date_of_highest_streak.date()}. You checked your habit {self.highest_streak} times during that time period.")
         
                     
@@ -168,6 +165,9 @@ the following number of days: {number_of_days} or the following number of weeks:
         nan_check = pd.isna(self.lowest_streak) 
         if nan_check == True:
             self.lowest_streak = 0
+
+        self.number_of_days_lowest = self.lowest_streak*self.periodicity
+        
         
         df['start_of_streak'] = df[self.habit_name].ne(df[self.habit_name].shift())
         df['streak_id'] = df['start_of_streak'].cumsum()
@@ -179,6 +179,8 @@ the following number of days: {number_of_days} or the following number of weeks:
         nan_check = pd.isna(self.highest_streak) 
         if nan_check == True:
             self.highest_streak = 0
+
+        self.number_of_days_highest = self.highest_streak*self.periodicity
             
     
     def set_start_day(self):
@@ -464,9 +466,10 @@ Enter an integer. For example for daily periodicity 1, for weekly periodicity 7.
             self.habit_dict[x].analyse_habit_no_user_input()
             
         for x in self.habit_dict:
-            habit_list.append(interface.habit_dict[x])
+            habit_list.append(self.habit_dict[x])
           
         max_attr = max(habit_list, key=lambda x:x.highest_streak)
+        max_attr_days = max(habit_list, key=lambda x:x.number_of_days_highest)
         
         if  max_attr.highest_streak == 0:
             print("You have no streaks")
@@ -475,10 +478,16 @@ Enter an integer. For example for daily periodicity 1, for weekly periodicity 7.
         
             for x in self.habit_dict:
                 if self.habit_dict[x].highest_streak == max_attr.highest_streak:
-                    print("Your", interface.habit_dict[x].periodicity, "day habit", \
-                          interface.habit_dict[x].habit_name, \
-                          "has the highest streak of", \
-                          interface.habit_dict[x].highest_streak)
+                    print("Your", self.habit_dict[x].periodicity, "day habit", \
+                    self.habit_dict[x].habit_name, \
+                    "has the highest streak of", \
+                    self.habit_dict[x].highest_streak, "ticked of habits in a row")
+
+                if self.habit_dict[x].number_of_days_highest == max_attr_days.number_of_days_highest:
+                    print("Your", self.habit_dict[x].periodicity, "day habit", \
+                    self.habit_dict[x].habit_name, \
+                    "has the longest consecutive streak of", \
+                    self.habit_dict[x].number_of_days_highest, "days")
                     
                     
     def analyse_habit_min_streak(self):
@@ -493,6 +502,7 @@ Enter an integer. For example for daily periodicity 1, for weekly periodicity 7.
           
             
         min_attr = max(habit_list, key=lambda x:x.lowest_streak)
+        min_attr_days = max(habit_list, key=lambda x:x.number_of_days_lowest)
         
         if  min_attr.lowest_streak == 0:
             print("You have completed all your habits perfectly")
@@ -503,8 +513,15 @@ Enter an integer. For example for daily periodicity 1, for weekly periodicity 7.
                 if self.habit_dict[x].lowest_streak == min_attr.lowest_streak:
                     print("Your", interface.habit_dict[x].periodicity, "day habit", \
                           interface.habit_dict[x].habit_name, \
-                          "has the longest streak of not achieving your goal of", \
-                          interface.habit_dict[x].lowest_streak, "days")
+                          "has the longest streak of not ticking of your habit", \
+                          interface.habit_dict[x].lowest_streak, "times in a row")
+
+                if self.habit_dict[x].number_of_days_lowest == min_attr_days.number_of_days_lowest:
+
+                    print("Your", self.habit_dict[x].periodicity, "day habit", \
+                    self.habit_dict[x].habit_name, \
+                    "has the longest consecutive streak of not achieving your goal", \
+                    self.habit_dict[x].number_of_days_lowest, "days")
             
     def user_interface(self):
         
@@ -519,15 +536,15 @@ Enter an integer. For example for daily periodicity 1, for weekly periodicity 7.
         
         if input_check == 1:
             datamanager.import_from_file()
-            self.user_interface()
+            #self.user_interface()
         
         elif input_check == 2:  
             self.create_habit()
-            self.user_interface()
+            #self.user_interface()
             
         elif input_check == 3: 
              self.delete_habit()
-             self.user_interface()
+             #self.user_interface()
                        
         elif input_check == 4: 
             print("you have data for the following habits:\n")
@@ -545,14 +562,14 @@ Press 2. to add a new entry on anyday.\n"
             
                 if new_entry_check == 1:
                     interface.habit_dict[habit_input].add_value_today()
-                    self.user_interface()
+                    #self.user_interface()
                 elif new_entry_check == 2:
                     interface.habit_dict[habit_input].add_value_anyday()
-                    self.user_interface()
+                    #self.user_interface()
                    
             if habit_input not in self.habit_dict:
                 print("No such habit exists. Try again")
-                self.user_interface()
+                #self.user_interface()
             
         elif input_check == 5:
             table = ["1. Show all habits", "2. Analyse streaks", 
@@ -567,17 +584,17 @@ Press 2. to add a new entry on anyday.\n"
          
             if input_check == 1:
                 interface.show_all_habit()
-                self.user_interface()
+                #self.user_interface()
 
             elif input_check == 2:
                 print("you have data for the following habits:\n")
                 self.show_all_habit()
                 habit_input = input("Which habit do you want to analyse?\n")
                 interface.habit_dict[habit_input].analyse_habit()
-                self.user_interface()   
+                #self.user_interface()   
             elif input_check == 3:
                 interface.present_habits_with_equal_periodicity()
-                self.user_interface()
+                #self.user_interface()
             elif input_check == 4:
                 lowval = 1
                 highval = 2
@@ -590,11 +607,11 @@ Press 2. to analyse the habit with the longest unsucessful streak.\n"
                     self.user_interface()
                 elif input_check == 2:
                     interface.analyse_habit_min_streak()
-                    self.user_interface()
+                    #self.user_interface()
                 
         elif input_check == 6:
             datamanager.saveall_merged_to_file()
-            self.user_interface()
+            #self.user_interface()
 
         elif input_check == 7:
             print("Goodbye")
@@ -606,13 +623,28 @@ class Datamanager:
     
     def __init__(self):
         pass
-    
-
-            
+     
             
     def saveall_merged_to_file(self):
+
+        
+
+        text ="Press 1. for the system namescape of your file\nPress 2. for custom name of your file."
+        lowval = 1
+        highval = 2
+
+        input_check = interface.int_and_range_check(lowval, highval, text)
+
+        if input_check == 1:
+            date_today = "{:%Y_%m_%d_%H_%M_%S}".format(dt.datetime.now())
+            file_name_today = "habit_file" +"_" + date_today +".csv" 
+
+        elif input_check == 2:
+            file_name_today = input("Enter your file name.")
+            file_name_today = file_name_today + ".csv" 
+
     
-        date_today = "{:%Y_%m_%d_%H_%M_%S}".format(dt.datetime.now())
+       
         df_list = []
         meta_data_list = ["Blank"]
         merged_df = []
@@ -621,32 +653,32 @@ class Datamanager:
         for x in interface.habit_dict:
             df_var = interface.habit_dict[x].df
             df_list.append(df_var)
-            
+
+        #this needs t obe done so that the import works properly, for cases where the dataframes have different sizes. That way every imported
+        #that frame is ordered by date correctly.
+
         merged_df = reduce(lambda l, r: pd.merge(l, r, on='Date', how='outer'), df_list)
         merged_df = merged_df.sort_values(by=['Date'])
         merged_df = merged_df.reset_index(drop=True)
         
-
+        #the blank is necessary so that the periodciity and created meta data are within the collum of the merged dataframe. More entries would mean
+        # another rythm of entries.
 
         for x in interface.habit_dict:
             meta_data_list.extend([interface.habit_dict[x].periodicity, interface.habit_dict[x].created, "Blank"])
         
         merged_df.loc[len(merged_df.index)] = meta_data_list
-    
-
-        
       
-        date_today = "{:%Y_%m_%d_%H_%M_%S}".format(dt.datetime.now())
-        file_name_today = "habit_file" +"_" + date_today +".csv" 
+       
         merged_df.to_csv(file_name_today, index=False)
         print("saved as", file_name_today)
         
         
     def import_from_file(self):
        
-        #file_name = r"C:\Users\Max_G\ProgrammierProjekte\Habit-Tracker_IU\habit_file_2022_07_25_13_49_14"
-        file_name = input("Enter your the directory and filename of your file")
-    
+        file_name = r"C:\Users\Max_G\ProgrammierProjekte\Habit-Tracker_IU\example file.csv"
+        #file_name = input("Enter your the directory and filename of your file")
+
         df = pd.read_csv(f"{file_name}")
         
         meta_data = df.loc[len(df)-1].tolist()
@@ -674,9 +706,7 @@ class Datamanager:
             interface.habit_dict[name].end_date = interface.habit_dict[name].df.loc[len(interface.habit_dict[name].df)-1,"Date"].date()    
 
             
-        
-               
-            
+                
 interface = Interface()
 datamanager = Datamanager()
 interface.user_interface()          
