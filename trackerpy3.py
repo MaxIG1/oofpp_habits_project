@@ -785,9 +785,9 @@ class Datamanager:
 
         # this does the following: Iterate through a zipped list. The first iteration
         # will use the first habit_name from collum list. Since every thrid entry in the df is a new
-        # habit name this is is necessary codde. The meta data list works the same way. The
+        # habit name this is is necessary code. The meta data list works the same way. The
         # for loop takes every third entry, which is the periodicty, and every third entry starting from
-        # position to is the meta data of the creation.
+        # position two is the meta data of the creation.
         for name, periodicity, created in zip(
             collum_list[1::3], meta_data[1::3], meta_data[2::3]
         ):
