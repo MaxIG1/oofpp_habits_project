@@ -253,8 +253,11 @@ Press 2. if you did not achieve your goal habit {self.habit_name} today, the {da
             timedelta = self.start_date - dt.date.today()
             timedelta_days_check = timedelta.days % self.periodicity
             if timedelta_days_check == 0:
-                self.df.loc[[date_today_index[0]], self.habit_name] = True
-                print("Positive entry added for", dt.date.today())
+                try:
+                    self.df.loc[[date_today_index[0]], self.habit_name] = True
+                    print("Positive entry added for", dt.date.today())
+                except:
+                    print("You are outside of your time frame. Prolong your time-period.")
             else:
                 print("no", self.periodicity, "days have passed")
 
@@ -340,12 +343,59 @@ Press 2. if you are done with creating new entries\n"
             elif input_check == 2:
                 x = False
 
+    
+   
 
 # here is Interface class. The interface communicates with the user and holds the user_inteface.
 class Interface:
     def __init__(self):
         # this is the core functionality. All habits instances are stored within a dictionary.
         self.habit_dict = {}
+
+
+    def change_timeframe(self):
+            
+        print("The following habits exist:")
+        self.show_all_habit()
+
+        name = input("For which habit do you want to extend the dataframe for?\n")
+
+
+        if name in self.habit_dict:
+
+            fmt = "%Y-%m-%d"
+            text = "Enter yyyy-mm-dd of new end date of your dataframe"
+            end_date_new_frame = self.format_check(fmt, text)
+            
+            if self.habit_dict[name].df["Date"][0].date() < end_date_new_frame.date() <= self.habit_dict[name].df["Date"][max(self.habit_dict[name].df.index)].date() or end_date_new_frame.date() < self.habit_dict[name].df["Date"][0].date():
+                print("You are either within your timeframe or before") 
+            else:
+                df_expand = pd.DataFrame()
+                self.habit_dict[name].end_date = end_date_new_frame.date()
+
+                for x in self.habit_dict[name].df:
+                    entry_time_name = str("entry time " + self.habit_dict[name].habit_name)
+                    start_name = str("start " + self.habit_dict[name].habit_name)
+                    if x == "Date":
+                        df_expand[x] = pd.date_range(max(self.habit_dict[name].df["Date"]).date(), end_date_new_frame)
+                    elif x == self.habit_dict[name].habit_name:
+                        df_expand[x] = False
+    
+                    elif x == entry_time_name:
+                        df_expand[x] = " "
+                    elif x == start_name:
+                        df_expand[x] = False
+                    else:
+                        pass
+
+                df_expand.drop(index=0, inplace=True)
+                self.habit_dict[name].df = self.habit_dict[name].df.append(df_expand)
+                self.habit_dict[name].df.reset_index(drop=True, inplace = True)
+                df_expand = pd.DataFrame()
+
+        else:
+            print("No such habit exists")
+
 
     # the format check does check if the entered date has the right format.
     def format_check(self, fmt, text):
@@ -608,7 +658,8 @@ Enter an integer. For example for daily periodicity 1, for weekly periodicity 7.
             "4. Add new entry",
             "5. Anaylse habit",
             "6. Save",
-            "7. Close",
+            "7. Extend timeframe",
+            "8. Close",
         ]
         print(
             "USER INTERFACE \n Press the following numbers for your options\n",
@@ -616,7 +667,7 @@ Enter an integer. For example for daily periodicity 1, for weekly periodicity 7.
         )
 
         lowval = 1
-        highval = 7
+        highval = 8
         text = "Choose your option"
         input_check = self.int_and_range_check(lowval, highval, text)
 
@@ -708,6 +759,10 @@ Press 2. to analyse the habit with the longest unsucessful streak.\n"
             self.user_interface()
 
         elif input_check == 7:
+            interface.change_timeframe()
+            self.user_interface()
+
+        elif input_check == 8:
             print("Goodbye")
 
 
