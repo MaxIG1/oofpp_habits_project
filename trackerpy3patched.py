@@ -514,8 +514,8 @@ Press 2. if you are done with creating habits\n"
     # As the name might suggest, this is for deleting a habit.
     def delete_habit(self):
 
-        print("The following habits exist:")
-        self.show_all_habit()
+        # print("The following habits exist:")
+        # self.show_all_habit()
 
         name = input("which habit do you want to delete?\n")
 
@@ -717,15 +717,15 @@ Enter an integer. For example for daily periodicity 1, for weekly periodicity 7.
 
         if input_check == 1:
             datamanager.import_from_file()
-            self.user_interface()
+            # self.user_interface()
 
         elif input_check == 2:
             self.create_habit()
-            self.user_interface()
+            #self.user_interface()
 
         elif input_check == 3:
             self.delete_habit()
-            self.user_interface()
+            #self.user_interface()
 
         elif input_check == 4:
             print("you have data for the following habits:\n")
@@ -743,14 +743,14 @@ Press 2. to add a new entry on anyday.\n"
 
                 if new_entry_check == 1:
                     interface.habit_dict[habit_input].add_value_today()
-                    self.user_interface()
+                    #self.user_interface()
                 elif new_entry_check == 2:
                     interface.habit_dict[habit_input].add_value_anyday()
-                    self.user_interface()
+                    #self.user_interface()
 
             if habit_input not in self.habit_dict:
                 print("No such habit exists. Try again")
-                self.user_interface()
+                #self.user_interface()
 
         elif input_check == 5:
             table = [
@@ -769,7 +769,7 @@ Press 2. to add a new entry on anyday.\n"
 
             if input_check == 1:
                 interface.show_all_habit()
-                self.user_interface()
+                #self.user_interface()
 
             elif input_check == 2:
                 print("you have data for the following habits:\n")
@@ -780,10 +780,10 @@ Press 2. to add a new entry on anyday.\n"
                 else:
                     print("No such habit exists. Try again")
 
-                self.user_interface()
+                #self.user_interface()
             elif input_check == 3:
                 interface.present_habits_with_equal_periodicity()
-                self.user_interface()
+                #self.user_interface()
             elif input_check == 4:
                 lowval = 1
                 highval = 2
@@ -793,18 +793,18 @@ Press 2. to analyse the habit with the longest unsucessful streak.\n"
                 input_check = self.int_and_range_check(lowval, highval, text)
                 if input_check == 1:
                     interface.analyse_habit_max_streak()
-                    self.user_interface()
+                    #self.user_interface()
                 elif input_check == 2:
                     interface.analyse_habit_min_streak()
-                    self.user_interface()
+                    #self.user_interface()
 
         elif input_check == 6:
             datamanager.saveall_merged_to_file()
-            self.user_interface()
+            #self.user_interface()
 
         elif input_check == 7:
             interface.change_timeframe()
-            self.user_interface()
+            #self.user_interface()
 
         elif input_check == 8:
             print("Goodbye")
@@ -867,10 +867,10 @@ class Datamanager:
     # the datamanager import method imoprt the files
     def import_from_file(self):
 
-        # file_name = (
-        # r"C:\Users\Max_G\ProgrammierProjekte\Habit-Tracker_IU\example file.csv"
-        # )
-        file_name = input("Enter your the directory and filename of your file")
+        file_name = (
+        r"C:\Users\Max_G\ProgrammierProjekte\Habit-Tracker_IU\example_file_habit_tracker.csv"
+        )
+        # file_name = input("Enter your the directory and filename of your file")
         df = pd.read_csv(f"{file_name}")
 
         # this line does export the metadata from the datafame.
@@ -955,4 +955,4 @@ class Datamanager:
 
 interface = Interface()
 datamanager = Datamanager()
-interface.user_interface()
+# interface.user_interface()
