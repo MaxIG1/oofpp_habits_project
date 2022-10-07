@@ -28,7 +28,7 @@ class Habits:
 Press 2. if you want to analyse a custom timeframe.\n\
 You have data between {self.start_date} and {self.end_date}."
 
-        # the functions only accepts user input as integeger and within the definerd range Loval, highval.
+        # the functions only accepts user input as integer and within the defined range lowal, highval..
         input_check = interface.int_and_range_check(lowval, highval, text)
 
         # option 1 creates a temporary dataframe, from the tracking start date to today or to the end of the existing dataframe.
@@ -81,7 +81,7 @@ Press 2. to analyse your sucess streak for your habit {self.habit_name}.\n"
         highval = 2
         input_check = interface.int_and_range_check(lowval, highval, text)
 
-        # the following lines of code until the next input check calculate the longest streak#
+        # the following lines of code until the next input check calculate the longest streak
         # of not achieving ones goal.
         if input_check == 1:
 
@@ -113,7 +113,7 @@ Press 2. to analyse your sucess streak for your habit {self.habit_name}.\n"
                     index_up_of_lowest_streak[0], "Date"
                 ]
 
-                # the following two variables are needed to give the user a more precise information about his streak.
+                # the following two variables are needed to give users a more precise information about their streaks.
                 # Hence the the number of ticked of habits alone doesnt give enough information.
                 number_of_days = self.lowest_streak * self.periodicity
                 number_of_weeks = round((self.lowest_streak * self.periodicity / 7), 4)
@@ -170,7 +170,7 @@ the following number of days: {number_of_days} or the following number of weeks:
 
     # this function does the same as the function with user input but without user input.
     # it is needed for the comparison of max and min streaks, which the functions Interface.analyse_habit_max_streak()
-    # and Interface.analyse_habit_min_streak() use. Since it is unprobale that the user has analysed all of his habits
+    # and Interface.analyse_habit_min_streak() use. Since it is improbable that user have analysed all of their habits
     # recently this function will do that.
     def analyse_habit_no_user_input(self):
         df = self.df.iloc[self.row_position_start_date[0] :: self.periodicity, :]
@@ -243,7 +243,7 @@ the following number of days: {number_of_days} or the following number of weeks:
         text = f"Press 1. if you did achieve your goal for habit {self.habit_name} today, the {date_today}.\n\
 Press 2. if you did not achieve your goal habit {self.habit_name} today, the {date_today}\n"
 
-        # the functions only accepts user input as integeger and within the definerd range Loval, highval.
+        # the functions only accepts user input as integer and within the defined range lowal, highval..
         input_check = interface.int_and_range_check(lowval, highval, text)
 
         # the following lines of code check if "today" is within the needed periodicity. If so users can enter their entry,
@@ -289,7 +289,7 @@ Press 2. if you did not achieve your goal habit {self.habit_name} today, the {da
 
             entry_date = interface.format_check(fmt, text)
 
-            # this line checks if the entry date is within the allowed boundries. Else the user will be notified.
+            # this line checks if the entry date is within the allowed boundaries. Else the user will be notified.
             if self.start_date <= entry_date.date() <= self.end_date:
 
                 # the following lines of code do the checking of the periodicity
@@ -305,7 +305,7 @@ Press 2. if you did not achieve your goal habit {self.habit_name} today, the {da
                     text = f"Press 1. if you did achieve your goal for habit {self.habit_name} on the {entry_date.date()}.\n\
 Press 2. if you did not achieve your goal habit {self.habit_name} on the {entry_date.date()}.\n"
 
-                    # the functions only accepts user input as integeger and within the definerd range Loval, highval.
+                    # the functions only accepts user input as integer and within the defined range lowal, highval..
                     # Option 1 does create a positive entry
                     input_check = interface.int_and_range_check(lowval, highval, text)
                     if input_check == 1:
@@ -316,7 +316,7 @@ Press 2. if you did not achieve your goal habit {self.habit_name} on the {entry_
                             [row_posistion_of_entry_date[0]], self.entry_time_name
                         ] = current_time
                         print("Positive entry added for", entry_date.date())
-                    # Option 2 does create a positive entry
+                    # Option 2 does create a negative entry
                     elif input_check == 2:
                         self.df.loc[
                             [row_posistion_of_entry_date[0]], self.habit_name
@@ -337,7 +337,7 @@ Press 2. if you did not achieve your goal habit {self.habit_name} on the {entry_
             text = f"Press 1. if you want to add another day for your habit {self.habit_name}.\n\
 Press 2. if you are done with creating new entries\n"
 
-            # the functions only accepts user input as integeger and within the definerd range Loval, highval.
+            # the functions only accepts user input as integer and within the defined range lowal, highval..
             input_check = interface.int_and_range_check(lowval, highval, text)
 
             if input_check == 1:
@@ -442,7 +442,7 @@ class Interface:
             highval = 1095
             text = "Enter the periodicity of your habit as an integer.\n "
 
-            # the functions only accepts user input as integeger and within the definerd range Loval, highval.
+            # the functions only accepts user input as integer and within the defined range lowal, highval..
             periodicity = self.int_and_range_check(lowval, highval, text)
 
             # this is where the habits instances with their periodicities are stored within the dictionary.
@@ -503,7 +503,7 @@ Press 2: From custom date to custom date\n"
             text = f"Press 1. if you want to add another habit.\n\
 Press 2. if you are done with creating habits\n"
 
-            # The functions only accepts user input as integeger and within the definerd range Loval, highval.
+            # the functions only accepts user input as integer and within the defined range lowal, highval..
             input_check = interface.int_and_range_check(lowval, highval, text)
 
             if input_check == 1:
@@ -581,7 +581,7 @@ Press 2. if you are done with creating habits\n"
         text = "For which periodicity do you want to see your habits? \n\
 Enter an integer. For example for daily periodicity 1, for weekly periodicity 7.\n"
 
-        # the functions only accepts user input as integeger and within the definerd range Loval, highval.
+        # the functions only accepts user input as integer and within the defined range lowal, highval..
         periodicity_check = interface.int_and_range_check(lowval, highval, text)
 
         # this habit_list is used as a header of the tabulate table.
@@ -841,15 +841,15 @@ class Datamanager:
             df_var = interface.habit_dict[x].df
             df_list.append(df_var)
 
-        # the reduce function merges in the following way. First df 1 and 2. AFter that the resuslt of the merge with df3 and so on.
-        # an outer merge is ued whihc keeps all information and enters nan where no information exsits.
+        # the reduce function merges the following way. First df 1 and 2. After that the resuslt of the merge with df3 and so on.
+        # an outer merge is used which keeps all information and enters NaN where no information exists.
         # in this case that means that were no entries for a date exists nan will be entered, which will be used during the import.
         merged_df = reduce(lambda l, r: pd.merge(l, r, on="Date", how="outer"), df_list)
         merged_df = merged_df.sort_values(by=["Date"])
         merged_df = merged_df.reset_index(drop=True)
 
         # the following lines create a row with the metadata, that is passed into the merged df,
-        # so that it can be identified to which habit, which metadatabelongs
+        # so that it can be identified to which habit, which metadata belongs
         for x in interface.habit_dict:
             meta_data_list.extend(
                 [
@@ -882,7 +882,7 @@ class Datamanager:
         print("the following habits have beein imported", collum_list[1::3])
 
         # this does the following: Iterate through a zipped list. The first iteration
-        # will use the first habit_name from collum list. Since every thrid entry in the df is a new
+        # will use the first habit_name from collum list. Since every third entry in the df is a new
         # habit name this is is necessary code. The meta data list works the same way. The
         # for loop takes every third entry, which is the periodicty, and every third entry starting from
         # position two is the meta data of the creation.
@@ -898,7 +898,7 @@ class Datamanager:
             interface.habit_dict[name].df = df[
                 ["Date", interface.habit_dict[name].habit_name, col_name1, col_name2]
             ]
-            # drop all rows where in the collum habit name an na is included. That way only the original dataframe
+            # drop all rows where in the collum habit name an NaN is included. That way only the original dataframe
             # is restored
             interface.habit_dict[name].df = interface.habit_dict[name].df[
                 interface.habit_dict[name]
@@ -909,17 +909,17 @@ class Datamanager:
             interface.habit_dict[name].df = interface.habit_dict[name].df.reset_index(
                 drop=True
             )
-            # trasnfroms text false and true to boolean. This collum contains the acutal ticked off habits
+            # transfroms text false and true to boolean. This collum contains the acutal ticked off habits
             interface.habit_dict[name].df[name] = (
                 interface.habit_dict[name].df[name].map({"True": True, "False": False})
             )
-            # trasnfroms text false and true to boolean. This collum contains the start-date of tracking
+            # transforms text false and true to boolean. This column contains the start-date of tracking
             interface.habit_dict[name].df[col_name2] = (
                 interface.habit_dict[name]
                 .df[col_name2]
                 .map({"True": True, "False": False})
             )
-            # the following lines of code recreated meta-data or information that is need for analyis:
+            # the following lines of code recreate meta-data or information that is need for analyis:
             # here the row position start date, which the analyse habit method uses.
             interface.habit_dict[name].row_position_start_date = (
                 interface.habit_dict[name]
@@ -931,7 +931,7 @@ class Datamanager:
                 interface.habit_dict[name].df["Date"]
             )
 
-            # the next line is abundand but to makes the code clearer the start date is created
+            # the next line is abundant but to make the code clearer the start date is created
             # so that the next function, can use it.
             row_position_start_date = interface.habit_dict[
                 name
