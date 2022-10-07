@@ -257,7 +257,7 @@ Press 2. if you did not achieve your goal habit {self.habit_name} today, the {da
                     self.df.loc[[date_today_index[0]], self.habit_name] = True
                     print("Positive entry added for", dt.date.today())
                 except:
-                    print("You are outside of your time frame. Prolong your time-period.")
+                    print("You are outside of your timeframe. Prolong your time-period with option 7.")
             else:
                 print("no", self.periodicity, "days have passed")
 
@@ -342,9 +342,6 @@ Press 2. if you are done with creating new entries\n"
                 x = True
             elif input_check == 2:
                 x = False
-
-    
-   
 
 # here is Interface class. The interface communicates with the user and holds the user_inteface.
 class Interface:
@@ -521,13 +518,33 @@ Press 2. if you are done with creating habits\n"
     def show_all_habit(self):
         list_names = ["Habit name"]
         list_created = ["Date created"]
+        list_periodicity = ["Periodicity"]
+        list_due_date = ["Next due date"]
+
+        transform_dict = {}
 
         for x in self.habit_dict:
             list_names.append(self.habit_dict[x].habit_name)
             list_created.append(self.habit_dict[x].created.date())
+            list_periodicity.append(self.habit_dict[x].periodicity)
+            transform_dict[x] = self.habit_dict[x].df.copy()
+            
+        for df_name in transform_dict:
+            delta_list = []
+            for column in transform_dict[df_name]["Date"][self.habit_dict[df_name].row_position_start_date[0]::self.habit_dict[df_name].periodicity]:
+                delta_list.append(((column.date())-dt.date.today()).days)
+    
+            transform_dict[df_name] = transform_dict[df_name][self.habit_dict[df_name].row_position_start_date[0]::self.habit_dict[df_name].periodicity]
+            
+            transform_dict[df_name]["timedelta"] = delta_list
+            transform_dict[df_name] = transform_dict[df_name].loc[transform_dict[df_name]["timedelta"] >= 0]
 
-        table = [list_names, list_created]
+            list_due_date.append(transform_dict[df_name]["Date"][transform_dict[df_name]["timedelta"].idxmin()].date())
+
+        table = [list_names, list_created, list_periodicity, list_due_date]
         print(tabulate(table))
+
+        transform_dict = {}
 
     # As the name suggests, this presents all habits with equal periodicity.
     def present_habits_with_equal_periodicity(self):
@@ -827,8 +844,8 @@ class Datamanager:
         # r"C:\Users\Max_G\ProgrammierProjekte\Habit-Tracker_IU\example file.csv"
         # )
         file_name = input("Enter your the directory and filename of your file")
-
         df = pd.read_csv(f"{file_name}")
+        
 
         # this line does export the metadata from the datafame.
         meta_data = df.loc[len(df) - 1].tolist()
