@@ -13,9 +13,9 @@ The following functionalities are available:
 
 - View all tracked habits, with information about the periodicity, creation date and the next due date.
 
-- Analysis of the habit with the longest successful streak either 
+- Analysis of the habit with the longest successful streak
 
-- Analysis of the habit with the shortest successful streak either 
+- Analysis of the habit with the shortest successful streak 
 
 - Analysis of a habit and its longest or shortest sucess streak within a custom or preset timeframe. 
 
